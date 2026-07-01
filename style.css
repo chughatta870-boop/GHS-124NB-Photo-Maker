@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passport Photo Maker - GHS 124NB</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4D96FF">
+</head>
+<body>
+  <div class="container">
+    <h1>📸 Passport Photo Maker</h1>
+    <p>600x800px | 10KB-25KB | White Background</p>
+
+    <div class="upload-box">
+      <input type="file" id="upload" accept="image/*">
+      <label for="upload">+ Upload Picture</label>
+    </div>
+
+    <div class="preview-area" id="previewArea" style="display:none;">
+      <canvas id="canvas" width="600" height="800"></canvas>
+      <div class="controls">
+        <label>Quality: <span id="kbSize">0 KB</span></label>
+        <button id="download">Download JPG</button>
+        <button id="reset">Reset</button>
+      </div>
+    </div>
+  </div>
+
+<script src="script.js"></script>
+<script>
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+</body>
+</html>
