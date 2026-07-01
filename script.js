@@ -8,31 +8,44 @@ const resetBtn = document.getElementById('reset');
 
 const TARGET_W = 600;
 const TARGET_H = 800;
-const MIN_KB = 10;
 const MAX_KB = 25;
 
-upload.addEventListener('change', e => {
+// 1. AI Library Load Karein - Background Hataane Ke Liye
+import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.0.0/dist/index.js').then(module => {
+  window.removeBackground = module.removeBackground;
+});
+
+upload.addEventListener('change', async e => {
   const file = e.target.files[0];
   if(!file) return;
 
-  const img = new Image();
-  img.onload = () => {
-    // 1. White Background Fill
+  previewArea.style.display = 'block';
+  kbSize.textContent = 'Processing...';
+
+  try {
+    // 2. AI se Background Remove karo
+    const imageFile = file;
+    const blob = await window.removeBackground(imageFile);
+    const img = await createImageBitmap(blob);
+
+    // 3. White Background Fill
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, TARGET_W, TARGET_H);
 
-    // 2. Image ko Center me Fit karo, Crop nahi
+    // 4. Bande ko Center me Fit karo 600x800 me
     const scale = Math.min(TARGET_W / img.width, TARGET_H / img.height);
     const w = img.width * scale;
     const h = img.height * scale;
     const x = (TARGET_W - w) / 2;
-    const y = (TARGET_H - h) / 2;
+    const y = 20; // Thora upar se start taake sir na katay
     ctx.drawImage(img, x, y, w, h);
 
-    previewArea.style.display = 'block';
-    compressToTargetKB(0.9); // Start with 90% quality
-  };
-  img.src = URL.createObjectURL(file);
+    compressToTargetKB(0.9);
+
+  } catch (err) {
+    alert('Background remove nahi hua. Koi saaf picture try karein.');
+    console.error(err);
+  }
 });
 
 function compressToTargetKB(quality){
@@ -40,11 +53,10 @@ function compressToTargetKB(quality){
     let sizeKB = blob.size / 1024;
     kbSize.textContent = sizeKB.toFixed(1) + ' KB';
 
-    // 3. Auto Compress Logic: 10KB to 25KB ke beech laana hai
     if(sizeKB > MAX_KB && quality > 0.3){
-      compressToTargetKB(quality - 0.1); // Quality kam karo
+      compressToTargetKB(quality - 0.1);
     } else {
-      window.finalBlob = blob; // Save kar lo download ke liye
+      window.finalBlob = blob;
     }
   }, 'image/jpeg', quality);
 }
